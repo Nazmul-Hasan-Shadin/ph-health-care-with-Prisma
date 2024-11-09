@@ -1,83 +1,53 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import { AdminServices } from "./admin.service";
 import pick from "../../../shared/pick";
 import { adminFilterableFields } from "./admin.const";
 import sendResponse from "../../../shared/sendResponse";
+import catchAsync from "../../../shared/catchAsync";
 
-const getAllFromDb = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const filters = pick(req.query, adminFilterableFields);
-    const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+const getAllFromDb = catchAsync(async (req, res, next) => {
+  const filters = pick(req.query, adminFilterableFields);
+  const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
 
-    console.log(options, "filaters");
+  console.log(options, "filaters");
 
-    const result = await AdminServices.getAllFromDb(filters, options);
+  const result = await AdminServices.getAllFromDb(filters, options);
 
-    // res.status(200).json({
-    //   success: true,
-    //   message: "Admin Retrived successful",
-    //   meta: result.meta,
-    //   data: result.data,
-    // });
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Admin Retrived succesful",
+    meta: result.meta,
+    data: result.data,
+  });
+});
 
-    sendResponse(res, {
-      statusCode: 200,
-      success: true,
-      message: "Admin Retrived succesful",
-      meta: result.meta,
-      data: result.data,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-const getByIdFromDb = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const getByIdFromDb = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  try {
-    const result = await AdminServices.getByIdFromDb(id);
+  const result = await AdminServices.getByIdFromDb(id);
 
-    sendResponse(res, {
-      statusCode: 200,
-      success: true,
-      message: "Admin data fetch by id",
-      data: result,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Admin data fetch by id",
+    data: result,
+  });
+});
 
-const updateIntoDb = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const updateIntoDb = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  try {
-    const result = await AdminServices.updateIntoDb(id, req.body);
+  const result = await AdminServices.updateIntoDb(id, req.body);
 
-    sendResponse(res, {
-      statusCode: 200,
-      success: true,
-      message: "Admin updated succesful",
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Admin updated succesful",
 
-      data: result,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+    data: result,
+  });
+});
 
 const deleteFromDb = async (
   req: Request,

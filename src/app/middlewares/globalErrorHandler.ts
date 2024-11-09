@@ -8,7 +8,7 @@ const globlaErrorHandler = (
 ) => {
   res.status(500).json({
     success: false,
-    message: err.name || "something went wrong",
+    message: err.message || "something went wrong",
     error: err,
   });
 };

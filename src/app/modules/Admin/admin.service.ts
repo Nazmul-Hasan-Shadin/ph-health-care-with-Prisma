@@ -3,8 +3,15 @@ import { dir } from "console";
 import { adminSearchAbleField } from "./admin.const";
 import { calcultaePagination } from "../../../helpers/paginationHelper";
 import prisma from "../../../shared/prisma";
+import { IAdminFilterRequest } from "./admin.interface";
+import { IPaginatioOptions } from "../../interfaces/pagination";
 
-const getAllFromDb = async (params: any, options: any) => {
+const getAllFromDb = async (
+  params: IAdminFilterRequest,
+  options: IPaginatioOptions
+) => {
+  console.log(params, "params");
+
   const { limit, page, skip } = calcultaePagination(options);
   const { searchTerm, ...filterDaa } = params;
 
@@ -25,7 +32,7 @@ const getAllFromDb = async (params: any, options: any) => {
     andCondition.push({
       AND: Object.keys(filterDaa).map((key) => ({
         [key]: {
-          equals: filterDaa[key],
+          equals: (filterDaa as any)[key],
         },
       })),
     });
