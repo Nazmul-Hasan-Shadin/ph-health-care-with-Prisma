@@ -4,6 +4,8 @@ import jwt, { JwtPayload, Secret } from "jsonwebtoken";
 import { generateToken, jwtHelpers } from "../../../helpers/jwtHelpers";
 import { UserStatus } from "@prisma/client";
 import config from "../../../config";
+import emailSender from "./emailSender";
+import AppError from "../../Errors/AppError";
 
 const loginUser = async (payload: { email: string; password: string }) => {
   console.log(payload);
@@ -102,8 +104,87 @@ const changePassword = async (user: any, payload: any) => {
   };
 };
 
+const forgetPassword = async (payload: { email: string }) => {
+  const userData = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: payload.email,
+      status: UserStatus.ACTIVE,
+    },
+  });
+
+  const resetPasswordToken = jwtHelpers.generateToken(
+    { email: userData.email, role: userData.role },
+    config.jwt.reset_pass_token as string,
+    "5m"
+  );
+
+  const resetPasswordLink =
+    config.jwt.reset_pass_link +
+    `?userId:${userData.id}&token=${resetPasswordToken}`;
+
+  console.log(resetPasswordLink);
+
+  await emailSender(
+    userData.email,
+    `
+
+    <div> 
+<p>  Dear user  </p>
+
+<p>  Your password Reset Link 
+
+
+<a href=${resetPasswordLink}>
+    <button> Reset Pass </button>
+
+
+</a>  </p>
+
+
+
+
+    </div>
+   
+   `
+  );
+  
+
+  //http://localhost:3000/reset-pass?email=shadin@gmail.com&token=kjffffffffffirrrrrrrrrrrrrrrr
+};
+ 
+const resetPassword=async(token:string,payload:{
+  id:string,
+  password:string
+})=>{
+ 
+
+const userData= await prisma.user.findFirstOrThrow({
+  where:{
+    id:payload.id,
+    status:UserStatus.ACTIVE
+  }
+})
+
+const isValidToken=jwtHelpers.verifyToken(token,config.jwt.reset_pass_token as string)
+
+   if (!isValidToken) {
+     throw new AppError(503,"forbidden")
+   }
+
+   
+
+
+// hash password
+//update into database
+
+ 
+
+}
+
 export const AuthServices = {
   loginUser,
   refreshToken,
   changePassword,
+  forgetPassword,
+  resetPassword
 };
