@@ -19,7 +19,7 @@ app.use(cors());
 //  parser
 app.use(express.json());
 app.use(cookieParser());
-// app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req: Request, res: Response) => {
   res.send({
