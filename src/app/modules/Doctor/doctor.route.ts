@@ -13,5 +13,8 @@ router.patch('/:id',
 
 
 )
+ 
+
+
 
 export const DoctorRoutes=router
